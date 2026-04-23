@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 const SIGHT_WORDS = [
@@ -106,10 +106,13 @@ function App() {
   const [soundOn, setSoundOn] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [pulse, setPulse] = useState("");
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [selectedResult, setSelectedResult] = useState("");
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
+  const [optionOffsets, setOptionOffsets] = useState({});
+  const [dragState, setDragState] = useState(null);
   const [round, setRound] = useState(() => buildSightRound(1));
+  const optionRefs = useRef({});
   const [progress, setProgress] = useState(() => {
     const saved = localStorage.getItem("learning-game-progress");
     return saved ? JSON.parse(saved) : DEFAULT_PROGRESS;
@@ -120,6 +123,15 @@ function App() {
   useEffect(() => {
     localStorage.setItem("learning-game-progress", JSON.stringify(progress));
   }, [progress]);
+
+  useEffect(() => {
+    const nextOffsets = {};
+    round.options.forEach((option, index) => {
+      nextOffsets[`${option}-${index}`] = 0;
+    });
+    setOptionOffsets(nextOffsets);
+    setDragState(null);
+  }, [round]);
 
   const accuracy = useMemo(() => {
     const { correct, total } =
@@ -134,7 +146,7 @@ function App() {
     setRoundIndex(1);
     setStreak(0);
     setFeedback("");
-    setSelectedOption(null);
+    setSelectedOptionId(null);
     setSelectedResult("");
     setIsAnswerLocked(false);
     setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
@@ -159,7 +171,7 @@ function App() {
     setRoundIndex((prev) => prev + 1);
     const resolvedLevel = Math.max(1, Math.min(3, nextLevel));
     setLevel(resolvedLevel);
-    setSelectedOption(null);
+    setSelectedOptionId(null);
     setSelectedResult("");
     setIsAnswerLocked(false);
     setRound(
@@ -244,12 +256,13 @@ function App() {
     }, 700);
   }
 
-  function handleAnswer(value) {
+  function submitAnswer(optionId, value) {
     if (isAnswerLocked) return;
 
-    setSelectedOption(value);
+    setSelectedOptionId(optionId);
     setSelectedResult("");
     setIsAnswerLocked(true);
+    setDragState(null);
 
     window.setTimeout(() => {
       const isCorrect =
@@ -257,6 +270,57 @@ function App() {
       setSelectedResult(isCorrect ? "correct" : "wrong");
       resolveAnswer(value);
     }, 450);
+  }
+
+  function getMaxSlide(optionId) {
+    const optionEl = optionRefs.current[optionId];
+    if (!optionEl) return 0;
+    return Math.max(0, optionEl.offsetWidth - 70);
+  }
+
+  function handleDragStart(optionId, event) {
+    if (isAnswerLocked) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragState({
+      optionId,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startOffset: optionOffsets[optionId] || 0,
+    });
+  }
+
+  function handleDragMove(optionId, optionValue, event) {
+    if (!dragState || dragState.optionId !== optionId || isAnswerLocked) return;
+
+    const maxSlide = getMaxSlide(optionId);
+    if (maxSlide <= 0) return;
+
+    const deltaX = event.clientX - dragState.startX;
+    const rawOffset = dragState.startOffset + deltaX;
+    const clampedOffset = Math.max(0, Math.min(maxSlide, rawOffset));
+    const progress = clampedOffset / maxSlide;
+
+    setOptionOffsets((prev) => ({ ...prev, [optionId]: clampedOffset }));
+
+    if (progress >= 0.92) {
+      setOptionOffsets((prev) => ({ ...prev, [optionId]: maxSlide }));
+      submitAnswer(optionId, optionValue);
+    }
+  }
+
+  function handleDragEnd(optionId, event) {
+    if (dragState?.optionId !== optionId) return;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (!isAnswerLocked) {
+      setOptionOffsets((prev) => ({ ...prev, [optionId]: 0 }));
+    }
+    setDragState(null);
   }
 
   function resetProgress() {
@@ -372,32 +436,54 @@ function App() {
           )}
 
           <div className={`options options-${mode}`}>
-            {round.options.map((option, index) => (
-              <button
-                key={`${option}-${index}`}
-                type="button"
-                className={[
-                  "option",
-                  selectedOption === option ? "option-selected" : "",
-                  selectedOption === option && selectedResult === "correct"
-                    ? "option-correct"
-                    : "",
-                  selectedOption === option && selectedResult === "wrong"
-                    ? "option-wrong"
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => handleAnswer(option)}
-                disabled={isAnswerLocked}
-              >
-                <span className="option-slider" aria-hidden="true"></span>
-                <span className="option-label">{option}</span>
-              </button>
-            ))}
+            {round.options.map((option, index) => {
+              const optionId = `${option}-${index}`;
+              const offset = optionOffsets[optionId] || 0;
+
+              return (
+                <button
+                  key={optionId}
+                  ref={(el) => {
+                    optionRefs.current[optionId] = el;
+                  }}
+                  type="button"
+                  className={[
+                    "option",
+                    selectedOptionId === optionId &&
+                    selectedResult === "correct"
+                      ? "option-correct"
+                      : "",
+                    selectedOptionId === optionId && selectedResult === "wrong"
+                      ? "option-wrong"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  style={{ "--slide-x": `${offset}px` }}
+                  disabled={isAnswerLocked}
+                >
+                  <span className="option-slider" aria-hidden="true"></span>
+                  <span
+                    className="option-handle"
+                    aria-hidden="true"
+                    onPointerDown={(event) => handleDragStart(optionId, event)}
+                    onPointerMove={(event) =>
+                      handleDragMove(optionId, option, event)
+                    }
+                    onPointerUp={(event) => handleDragEnd(optionId, event)}
+                    onPointerCancel={(event) => handleDragEnd(optionId, event)}
+                  >
+                    ⇢
+                  </span>
+                  <span className="option-label">{option}</span>
+                </button>
+              );
+            })}
           </div>
 
-          <p className="feedback">{feedback || "Pick your answer!"}</p>
+          <p className="feedback">
+            {feedback || "Slide the side bar to answer!"}
+          </p>
           <div className="summary-bar">
             <span>Streak: {streak}</span>
             <span>Accuracy: {accuracy}%</span>

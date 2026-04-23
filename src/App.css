@@ -289,6 +289,8 @@
 .option {
   position: relative;
   overflow: hidden;
+  --slide-x: 0px;
+  --handle-size: 52px;
   background: #fff;
   color: #183b6a;
   border: 2px solid #c8dbf7;
@@ -298,22 +300,39 @@
 .option-slider {
   position: absolute;
   inset: 0 auto 0 0;
-  width: 0;
+  width: calc(var(--slide-x) + var(--handle-size));
   background: linear-gradient(90deg, #8dd7ff, #4fcaf7);
   opacity: 0.35;
   transition:
-    width 0.45s linear,
+    width 0.12s linear,
     background 0.2s ease,
     opacity 0.2s ease;
+}
+
+.option-handle {
+  position: absolute;
+  left: calc(8px + var(--slide-x));
+  top: 50%;
+  width: var(--handle-size);
+  height: var(--handle-size);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  background: linear-gradient(160deg, #2f89ff, #1f6bd8);
+  color: #fff;
+  font-size: 1.7rem;
+  font-weight: 900;
+  box-shadow: 0 8px 14px rgba(31, 107, 216, 0.32);
+  touch-action: none;
+  z-index: 2;
+  user-select: none;
 }
 
 .option-label {
   position: relative;
   z-index: 1;
-}
-
-.option-selected .option-slider {
-  width: 100%;
+  padding-left: calc(var(--handle-size) + 14px);
 }
 
 .option-correct {
