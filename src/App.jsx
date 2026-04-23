@@ -247,13 +247,22 @@ function App() {
 
       <header className="top-bar">
         <h1>Spark Garden</h1>
-        <button
-          className="toggle"
-          type="button"
-          onClick={() => setSoundOn((prev) => !prev)}
-        >
-          Sound: {soundOn ? "On" : "Off"}
-        </button>
+        <div className="top-bar-actions">
+          <button
+            className="toggle toggle-progress"
+            type="button"
+            onClick={() => setScreen("progress")}
+          >
+            📊 Progress
+          </button>
+          <button
+            className="toggle"
+            type="button"
+            onClick={() => setSoundOn((prev) => !prev)}
+          >
+            {soundOn ? "🔊" : "🔇"}
+          </button>
+        </div>
       </header>
 
       {screen === "home" && (
@@ -265,27 +274,48 @@ function App() {
             rich animations.
           </p>
 
-          <div className="action-grid">
+          <div className="game-card-grid">
             <button
               type="button"
-              className="action action-sight"
+              className="game-card game-card-sight"
               onClick={() => startGame("sight")}
             >
-              Sight Word Game
+              <img
+                src="/sight-game.png"
+                alt="Sight Word Game"
+                className="game-card-img"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+              <div
+                className="game-card-fallback game-card-fallback-sight"
+                aria-hidden="true"
+              >
+                📖
+              </div>
+              <span className="game-card-label">Sight Word Game</span>
             </button>
             <button
               type="button"
-              className="action action-math"
+              className="game-card game-card-math"
               onClick={() => startGame("math")}
             >
-              Math Game
-            </button>
-            <button
-              type="button"
-              className="action action-mix"
-              onClick={() => setScreen("progress")}
-            >
-              Parent Progress
+              <img
+                src="/math-game.png"
+                alt="Math Game"
+                className="game-card-img"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+              <div
+                className="game-card-fallback game-card-fallback-math"
+                aria-hidden="true"
+              >
+                🔢
+              </div>
+              <span className="game-card-label">Math Game</span>
             </button>
           </div>
 
