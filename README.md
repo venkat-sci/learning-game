@@ -8,6 +8,8 @@ A fun, touch-first interactive learning website for kindergarten children to pra
 
 Spark Garden is designed for children who are just starting their reading and math journey. It keeps sessions short (15–20 minutes), rewards progress with stars and streaks, and adapts difficulty automatically so children stay challenged without feeling frustrated.
 
+![Spark Garden Home Screen](public/screenshots/Homescreen.png)
+
 ### Features
 
 - **Sight Word Game** — Hear a word spoken aloud, then tap the correct word from the options.
@@ -112,10 +114,6 @@ learning-game/
 ---
 
 ## Screenshots
-
-### Home Screen
-
-![Spark Garden Home Screen](public/screenshots/Homescreen.png)
 
 ### Sight Words Game Screen
 
