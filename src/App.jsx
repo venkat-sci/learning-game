@@ -106,6 +106,9 @@ function App() {
   const [soundOn, setSoundOn] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [pulse, setPulse] = useState("");
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedResult, setSelectedResult] = useState("");
+  const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const [round, setRound] = useState(() => buildSightRound(1));
   const [progress, setProgress] = useState(() => {
     const saved = localStorage.getItem("learning-game-progress");
@@ -131,6 +134,9 @@ function App() {
     setRoundIndex(1);
     setStreak(0);
     setFeedback("");
+    setSelectedOption(null);
+    setSelectedResult("");
+    setIsAnswerLocked(false);
     setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
     setScreen("game");
   }
@@ -153,6 +159,9 @@ function App() {
     setRoundIndex((prev) => prev + 1);
     const resolvedLevel = Math.max(1, Math.min(3, nextLevel));
     setLevel(resolvedLevel);
+    setSelectedOption(null);
+    setSelectedResult("");
+    setIsAnswerLocked(false);
     setRound(
       mode === "sight"
         ? buildSightRound(resolvedLevel)
@@ -161,7 +170,7 @@ function App() {
     setFeedback("");
   }
 
-  function handleAnswer(value) {
+  function resolveAnswer(value) {
     const isCorrect =
       mode === "sight" ? value === round.target : value === round.answer;
     const nextStreak = isCorrect ? streak + 1 : 0;
@@ -233,6 +242,21 @@ function App() {
       setPulse("");
       nextRound(nextLevel);
     }, 700);
+  }
+
+  function handleAnswer(value) {
+    if (isAnswerLocked) return;
+
+    setSelectedOption(value);
+    setSelectedResult("");
+    setIsAnswerLocked(true);
+
+    window.setTimeout(() => {
+      const isCorrect =
+        mode === "sight" ? value === round.target : value === round.answer;
+      setSelectedResult(isCorrect ? "correct" : "wrong");
+      resolveAnswer(value);
+    }, 450);
   }
 
   function resetProgress() {
@@ -352,10 +376,23 @@ function App() {
               <button
                 key={`${option}-${index}`}
                 type="button"
-                className="option"
+                className={[
+                  "option",
+                  selectedOption === option ? "option-selected" : "",
+                  selectedOption === option && selectedResult === "correct"
+                    ? "option-correct"
+                    : "",
+                  selectedOption === option && selectedResult === "wrong"
+                    ? "option-wrong"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
                 onClick={() => handleAnswer(option)}
+                disabled={isAnswerLocked}
               >
-                {option}
+                <span className="option-slider" aria-hidden="true"></span>
+                <span className="option-label">{option}</span>
               </button>
             ))}
           </div>
