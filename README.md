@@ -111,6 +111,22 @@ learning-game/
 
 ---
 
+## Screenshots
+
+### Home Screen
+
+![Spark Garden Home Screen](public/screenshots/Homescreen.png)
+
+### Sight Words Game Screen
+
+![Spark Garden Sight Words Screen](public/screenshots/sightWordsScreen.png)
+
+### Math Game Screen
+
+![Spark Garden Math Screen](public/screenshots/MathScreenshot.png)
+
+---
+
 ## License
 
 Copyright 2026 Spark Garden Contributors
