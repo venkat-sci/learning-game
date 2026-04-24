@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { SIGHT_WORDS } from "./data/sightWords";
+import { ENCOURAGEMENTS } from "./data/encouragements";
 
 const DEFAULT_PROGRESS = {
   stars: 0,
@@ -112,6 +113,16 @@ function App() {
     localStorage.setItem("learning-game-progress", JSON.stringify(progress));
   }, [progress]);
 
+  function speakEncouragement() {
+    if (!("speechSynthesis" in window)) return;
+    const phrase = randomFrom(ENCOURAGEMENTS);
+    const utter = new SpeechSynthesisUtterance(phrase);
+    utter.rate = 1.0;
+    utter.pitch = 1.4;
+    utter.volume = 1.0;
+    speechSynthesis.speak(utter);
+  }
+
   const accuracy = useMemo(() => {
     const { correct, total } =
       mode === "sight" ? progress.sight : progress.math;
@@ -181,6 +192,7 @@ function App() {
       setPulse("win");
       setFeedback("Great job! Keep going!");
       makeSound(nextStreak >= 3 ? "great" : "good", soundOn);
+      speakEncouragement();
       setProgress((prev) => {
         const base = {
           ...prev,
@@ -410,14 +422,12 @@ function App() {
             <p>Level {level}</p>
           </div>
 
-          <h3 className="prompt">
-            {mode === "sight" ? `Tap the word: ${round.target}` : round.prompt}
-          </h3>
-
-          {mode === "sight" && (
+          {mode === "sight" ? (
             <button className="hear-btn" type="button" onClick={speakWord}>
-              Hear the word
+              {round.target}
             </button>
+          ) : (
+            <div className="hear-btn prompt-display">{round.prompt}</div>
           )}
 
           <div className={`options options-${mode}`}>

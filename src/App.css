@@ -270,7 +270,17 @@
 .hear-btn {
   background: #163156;
   color: #fff;
+  margin-top: 0.75rem;
   margin-bottom: 0.85rem;
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  text-align: center;
+  width: 100%;
+}
+
+.prompt-display {
+  cursor: default;
+  pointer-events: none;
+  letter-spacing: 0.04em;
 }
 
 .options {
