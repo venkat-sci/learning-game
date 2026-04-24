@@ -8,12 +8,15 @@ import HomeScreen from "./components/HomeScreen";
 import GameScreen from "./components/GameScreen";
 import RewardScreen from "./components/RewardScreen";
 import ProgressScreen from "./components/ProgressScreen";
+import DotGame from "./components/DotGame";
+import { getPuzzlesForLevel } from "./data/dotPuzzles";
 
 const DEFAULT_PROGRESS = {
   stars: 0,
   sessions: 0,
   sight: { correct: 0, total: 0, bestStreak: 0, masteredWords: [] },
   math: { correct: 0, total: 0, bestStreak: 0 },
+  dot: { unlockedLevel: 1, completedPuzzles: [] },
 };
 
 function App() {
@@ -46,6 +49,10 @@ function App() {
   }, [mode, progress]);
 
   function startGame(nextMode) {
+    if (nextMode === "dot") {
+      setScreen("dot");
+      return;
+    }
     setMode(nextMode);
     setLevel(1);
     setRoundIndex(1);
@@ -54,6 +61,29 @@ function App() {
     setFeedback("");
     setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
     setScreen("game");
+  }
+
+  function completeDotPuzzle(puzzleId, level) {
+    setProgress((prev) => {
+      const dot = prev.dot ?? { unlockedLevel: 1, completedPuzzles: [] };
+      const alreadyDone = dot.completedPuzzles.includes(puzzleId);
+      const completedPuzzles = alreadyDone
+        ? dot.completedPuzzles
+        : [...dot.completedPuzzles, puzzleId];
+      // Unlock next level if all puzzles in current level are done
+      const levelPuzzles = getPuzzlesForLevel(level);
+      const allLevelDone = levelPuzzles.every((p) =>
+        completedPuzzles.includes(p.id),
+      );
+      const unlockedLevel = allLevelDone
+        ? Math.min(4, Math.max(dot.unlockedLevel, level + 1))
+        : dot.unlockedLevel;
+      return {
+        ...prev,
+        stars: prev.stars + (alreadyDone ? 0 : 2),
+        dot: { unlockedLevel, completedPuzzles },
+      };
+    });
   }
 
   function nextRound(nextLevel) {
@@ -198,6 +228,16 @@ function App() {
           progress={progress}
           onHome={() => setScreen("home")}
           onReset={resetProgress}
+        />
+      )}
+
+      {screen === "dot" && (
+        <DotGame
+          soundOn={soundOn}
+          dotUnlockedLevel={progress.dot?.unlockedLevel ?? 1}
+          completedPuzzles={progress.dot?.completedPuzzles ?? []}
+          onComplete={completeDotPuzzle}
+          onBack={() => setScreen("home")}
         />
       )}
     </main>

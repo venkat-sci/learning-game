@@ -26,6 +26,16 @@ export function speakWord(word) {
   speechSynthesis.speak(repeatUtter);
 }
 
+export function speakPhrase(phrase) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(phrase);
+  utter.rate = 0.9;
+  utter.pitch = 1.3;
+  utter.volume = 1.0;
+  speechSynthesis.speak(utter);
+}
+
 export function speakEncouragement() {
   if (!("speechSynthesis" in window)) return;
   const phrase = randomFrom(ENCOURAGEMENTS);
