@@ -1,28 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-
-const SIGHT_WORDS = [
-  "the",
-  "and",
-  "is",
-  "it",
-  "you",
-  "we",
-  "can",
-  "go",
-  "see",
-  "play",
-  "look",
-  "little",
-  "big",
-  "come",
-  "here",
-  "jump",
-  "run",
-  "like",
-  "my",
-  "to",
-];
+import { SIGHT_WORDS } from "./data/sightWords";
 
 const DEFAULT_PROGRESS = {
   stars: 0,
@@ -73,6 +51,14 @@ function buildSightRound(level) {
   return { target, options: shuffled([target, ...decoys]) };
 }
 
+function buildOffsets(round) {
+  const offsets = {};
+  round.options.forEach((option, index) => {
+    offsets[`${option}-${index}`] = 0;
+  });
+  return offsets;
+}
+
 function buildMathRound(level) {
   const max = level === 1 ? 5 : level === 2 ? 10 : 15;
   const useSubtract = level >= 2 && Math.random() > 0.45;
@@ -109,9 +95,11 @@ function App() {
   const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [selectedResult, setSelectedResult] = useState("");
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
-  const [optionOffsets, setOptionOffsets] = useState({});
   const [dragState, setDragState] = useState(null);
   const [round, setRound] = useState(() => buildSightRound(1));
+  const [optionOffsets, setOptionOffsets] = useState(() =>
+    buildOffsets(buildSightRound(1)),
+  );
   const optionRefs = useRef({});
   const [progress, setProgress] = useState(() => {
     const saved = localStorage.getItem("learning-game-progress");
@@ -123,15 +111,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("learning-game-progress", JSON.stringify(progress));
   }, [progress]);
-
-  useEffect(() => {
-    const nextOffsets = {};
-    round.options.forEach((option, index) => {
-      nextOffsets[`${option}-${index}`] = 0;
-    });
-    setOptionOffsets(nextOffsets);
-    setDragState(null);
-  }, [round]);
 
   const accuracy = useMemo(() => {
     const { correct, total } =
@@ -149,7 +128,11 @@ function App() {
     setSelectedOptionId(null);
     setSelectedResult("");
     setIsAnswerLocked(false);
-    setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
+    const newRound =
+      nextMode === "sight" ? buildSightRound(1) : buildMathRound(1);
+    setRound(newRound);
+    setOptionOffsets(buildOffsets(newRound));
+    setDragState(null);
     setScreen("game");
   }
 
@@ -174,11 +157,13 @@ function App() {
     setSelectedOptionId(null);
     setSelectedResult("");
     setIsAnswerLocked(false);
-    setRound(
+    const newRound =
       mode === "sight"
         ? buildSightRound(resolvedLevel)
-        : buildMathRound(resolvedLevel),
-    );
+        : buildMathRound(resolvedLevel);
+    setRound(newRound);
+    setOptionOffsets(buildOffsets(newRound));
+    setDragState(null);
     setFeedback("");
   }
 
