@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { makeSound } from "../utils/sound";
+import { makeSound, playCelebration } from "../utils/sound";
 import { speakPhrase } from "../utils/speech";
 import { LETTERS, NUMBERS } from "../data/writeData";
+import Celebration from "./Celebration";
 
 const HIT_RADIUS = 28; // SVG units — generous for small fingers
 
@@ -62,6 +63,7 @@ export default function WriteGame({
   const [dragging, setDragging] = useState(false);
   const [cursorPos, setCursorPos] = useState(null);
   const [done, setDone] = useState(false);
+  const [waypointsState, setWaypointsState] = useState([]); // mirror of waypointsRef for render
 
   const svgRef = useRef(null);
   // Refs to avoid stale closures in pointer handlers
@@ -75,6 +77,7 @@ export default function WriteGame({
     waypointsRef.current = waypoints;
     connectedRef.current = 0;
     setActiveChar(ch);
+    setWaypointsState(waypoints);
     setConnected(0);
     setDragging(false);
     setCursorPos(null);
@@ -86,6 +89,8 @@ export default function WriteGame({
     setView("select");
     setActiveChar(null);
     connectedRef.current = 0;
+    waypointsRef.current = [];
+    setWaypointsState([]);
     setConnected(0);
     setDragging(false);
     setCursorPos(null);
@@ -141,11 +146,9 @@ export default function WriteGame({
         setDragging(false);
         setCursorPos(null);
         makeSound("great", soundOn);
+        playCelebration(soundOn);
         const ch = charRef.current;
-        const phrase =
-          ch.type === "letter"
-            ? `You wrote the letter ${ch.label}!`
-            : `You wrote the number ${ch.label}!`;
+        const phrase = ch.type === "letter" ? `${ch.label}!` : `${ch.label}!`;
         speakPhrase(phrase);
         onComplete(ch.id);
       } else {
@@ -213,9 +216,8 @@ export default function WriteGame({
   }
 
   // ── Trace view ───────────────────────────────────────────
-  const waypoints = waypointsRef.current;
+  const waypoints = waypointsState;
   const color = activeChar.color;
-  const totalStrokes = activeChar.strokes.length;
 
   // Build per-stroke polyline points from connected waypoints
   const strokePolylines = [];
@@ -462,7 +464,7 @@ export default function WriteGame({
 
       {done ? (
         <div className="write-reveal-banner">
-          <div className="confetti" aria-hidden="true" />
+          <Celebration />
           <p className="write-reveal-text">
             🎉 You wrote <strong style={{ color }}>{activeChar.label}</strong>!
           </p>

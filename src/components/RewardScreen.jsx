@@ -1,3 +1,5 @@
+import Celebration from "./Celebration";
+
 export default function RewardScreen({
   progress,
   streak,
@@ -6,7 +8,7 @@ export default function RewardScreen({
 }) {
   return (
     <section className="panel reward-panel">
-      <div className="confetti" aria-hidden="true"></div>
+      <Celebration />
       <h2>Awesome Work!</h2>
       <p>You completed today&apos;s challenge set.</p>
       <div className="summary-bar">

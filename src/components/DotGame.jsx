@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { makeSound } from "../utils/sound";
+import { makeSound, playCelebration } from "../utils/sound";
 import { speakPhrase } from "../utils/speech";
 import { getPuzzlesForLevel, LEVELS } from "../data/dotPuzzles";
+import Celebration from "./Celebration";
 
 const HIT_RADIUS = 24; // SVG units — generous for small fingers
 
@@ -100,6 +101,7 @@ export default function DotGame({
         setDragging(false);
         setCursorPos(null);
         makeSound("great", soundOn);
+        playCelebration(soundOn);
         speakPhrase(`You drew a ${puzzleRef.current.name}!`);
         onComplete(puzzleRef.current.id, puzzleRef.current.level);
       } else {
@@ -290,7 +292,7 @@ export default function DotGame({
 
       {done ? (
         <div className="dot-reveal-banner">
-          <div className="confetti" aria-hidden="true" />
+          <Celebration />
           <p className="dot-reveal-text">
             🎉 You drew a <strong>{name}</strong>! {emoji}
           </p>
