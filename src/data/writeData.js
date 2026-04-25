@@ -52,12 +52,19 @@ export const WRITE_CHARS = [
     type: "letter",
     color: LETTER_COLORS[0],
     strokes: [
+      // Inverted-V: bottom-left → apex → bottom-right
       [
-        { x: 100, y: 20 },
         { x: 30, y: 180 },
         { x: 65, y: 115 },
+        { x: 100, y: 20 },
         { x: 135, y: 115 },
         { x: 170, y: 180 },
+      ],
+      // Crossbar
+      [
+        { x: 60, y: 118 },
+        { x: 100, y: 118 },
+        { x: 140, y: 118 },
       ],
     ],
   },
@@ -125,14 +132,19 @@ export const WRITE_CHARS = [
     type: "letter",
     color: LETTER_COLORS[4],
     strokes: [
+      // Outer frame: top-right → top-left → down → bottom-right
       [
         { x: 145, y: 20 },
-        { x: 50, y: 20 },
-        { x: 50, y: 100 },
-        { x: 130, y: 100 },
-        { x: 50, y: 100 },
-        { x: 50, y: 180 },
+        { x: 45, y: 20 },
+        { x: 45, y: 100 },
+        { x: 45, y: 180 },
         { x: 145, y: 180 },
+      ],
+      // Middle arm
+      [
+        { x: 45, y: 100 },
+        { x: 100, y: 100 },
+        { x: 125, y: 100 },
       ],
     ],
   },
@@ -142,13 +154,18 @@ export const WRITE_CHARS = [
     type: "letter",
     color: LETTER_COLORS[5],
     strokes: [
+      // Top-right → top-left → down the full spine
       [
         { x: 145, y: 20 },
-        { x: 50, y: 20 },
-        { x: 50, y: 100 },
-        { x: 130, y: 100 },
-        { x: 50, y: 100 },
-        { x: 50, y: 180 },
+        { x: 45, y: 20 },
+        { x: 45, y: 100 },
+        { x: 45, y: 180 },
+      ],
+      // Middle arm
+      [
+        { x: 45, y: 100 },
+        { x: 100, y: 100 },
+        { x: 125, y: 100 },
       ],
     ],
   },
@@ -354,13 +371,20 @@ export const WRITE_CHARS = [
     type: "letter",
     color: LETTER_COLORS[17],
     strokes: [
+      // P-shape: up the spine, around the bump, back to mid-spine
       [
         { x: 50, y: 180 },
+        { x: 50, y: 100 },
         { x: 50, y: 20 },
         { x: 130, y: 20 },
         { x: 155, y: 45 },
         { x: 130, y: 100 },
         { x: 50, y: 100 },
+      ],
+      // Leg: diagonal down-right
+      [
+        { x: 50, y: 100 },
+        { x: 100, y: 140 },
         { x: 155, y: 180 },
       ],
     ],

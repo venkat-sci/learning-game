@@ -207,15 +207,8 @@ export default function WriteGame({
   });
 
   const lastSnapped = connected > 0 ? waypoints[connected - 1] : null;
-  // Only show trailing line within same stroke
-  const nextWp = connected < waypoints.length ? waypoints[connected] : null;
-  const sameStroke =
-    dragging &&
-    lastSnapped &&
-    cursorPos &&
-    !done &&
-    nextWp &&
-    nextWp.strokeIdx === lastSnapped.strokeIdx;
+  // Show trailing line from last snapped point to cursor whenever dragging
+  const showTrail = dragging && lastSnapped && cursorPos && !done;
 
   // Hint text
   let hintText;
@@ -307,8 +300,8 @@ export default function WriteGame({
             />
           ))}
 
-          {/* Live trailing dashed line */}
-          {sameStroke && (
+          {/* Live trailing line from last snapped point to current finger */}
+          {showTrail && (
             <line
               x1={lastSnapped.x}
               y1={lastSnapped.y}
@@ -368,42 +361,70 @@ export default function WriteGame({
             );
           })}
 
-          {/* Directional arrow at the NEXT waypoint */}
+          {/* Directional arrow — follows cursor while dragging, sits at next waypoint otherwise */}
           {!done &&
             connected < waypoints.length &&
             (() => {
-              const wp = waypoints[connected];
-              const after = waypoints[connected + 1];
-              const before = connected > 0 ? waypoints[connected - 1] : null;
-              const dx = after ? after.x - wp.x : before ? wp.x - before.x : 1;
-              const dy = after ? after.y - wp.y : before ? wp.y - before.y : 0;
-              const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-              const isStart = connected === 0;
+              const targetWp = waypoints[connected];
+              let ax, ay, angle;
+
+              if (dragging && cursorPos) {
+                // Arrow travels with the finger, pointing toward next waypoint
+                ax = cursorPos.x;
+                ay = cursorPos.y;
+                const dx = targetWp.x - cursorPos.x;
+                const dy = targetWp.y - cursorPos.y;
+                // If very close to target, keep last angle stable
+                const d = Math.sqrt(dx * dx + dy * dy);
+                angle = d < 4 ? 0 : Math.atan2(dy, dx) * (180 / Math.PI);
+              } else {
+                // Arrow sits at next waypoint, points along the path
+                ax = targetWp.x;
+                ay = targetWp.y;
+                const after = waypoints[connected + 1];
+                const before = connected > 0 ? waypoints[connected - 1] : null;
+                const dx = after
+                  ? after.x - targetWp.x
+                  : before
+                    ? targetWp.x - before.x
+                    : 1;
+                const dy = after
+                  ? after.y - targetWp.y
+                  : before
+                    ? targetWp.y - before.y
+                    : 0;
+                angle = Math.atan2(dy, dx) * (180 / Math.PI);
+              }
+
+              const isStart = connected === 0 && !dragging;
+              const isMoving = dragging && cursorPos;
+
               return (
                 <g style={{ pointerEvents: "none" }}>
                   <circle
-                    cx={wp.x}
-                    cy={wp.y}
+                    cx={ax}
+                    cy={ay}
                     r={isStart ? 16 : 13}
-                    fill={isStart ? color : "#fff"}
+                    fill={isMoving ? color : isStart ? color : "#fff"}
                     stroke={color}
-                    strokeWidth={isStart ? 0 : 2.5}
-                    className="write-next-pulse"
+                    strokeWidth={isStart || isMoving ? 0 : 2.5}
+                    className={isMoving ? "" : "write-next-pulse"}
+                    opacity={isMoving ? 0.85 : 1}
                   />
-                  <g transform={`translate(${wp.x},${wp.y}) rotate(${angle})`}>
+                  <g transform={`translate(${ax},${ay}) rotate(${angle})`}>
                     <line
                       x1="-6"
                       y1="0"
                       x2="5"
                       y2="0"
-                      stroke={isStart ? "#fff" : color}
+                      stroke="#fff"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
                     <polyline
                       points="2,-3.5 5,0 2,3.5"
                       fill="none"
-                      stroke={isStart ? "#fff" : color}
+                      stroke="#fff"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
