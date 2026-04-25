@@ -16,6 +16,26 @@ function dist(a, b) {
   return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 }
 
+// Catmull-Rom → cubic bezier smooth path through {x,y} points
+function smoothPath(pts) {
+  if (!pts || pts.length < 2) return "";
+  if (pts.length === 2)
+    return `M ${pts[0].x},${pts[0].y} L ${pts[1].x},${pts[1].y}`;
+  let d = `M ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(i + 2, pts.length - 1)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
 // Flatten all strokes into a single sequence of waypoints with stroke boundary info
 function buildWaypoints(strokes) {
   const points = [];
@@ -80,15 +100,22 @@ export default function WriteGame({
     const pos = svgPoint(svgEl, e.clientX, e.clientY);
     const c = connectedRef.current;
     const waypoints = waypointsRef.current;
-    // Must start near: waypoint[0] if nothing yet, or waypoint[c-1] to continue
-    const anchorIdx = c === 0 ? 0 : c - 1;
-    if (dist(pos, waypoints[anchorIdx]) <= HIT_RADIUS) {
+
+    // Accept tap near the NEXT waypoint (where arrow is) OR the last snapped point
+    // This lets kids resume by tapping the arrow directly, even after lifting mid-stroke
+    const nearNext =
+      c < waypoints.length && dist(pos, waypoints[c]) <= HIT_RADIUS;
+    const nearLast = c > 0 && dist(pos, waypoints[c - 1]) <= HIT_RADIUS;
+
+    if (nearNext || nearLast) {
       svgEl.setPointerCapture(e.pointerId);
       setDragging(true);
       setCursorPos(pos);
-      if (c === 0) {
-        connectedRef.current = 1;
-        setConnected(1);
+      // Auto-snap on first start or when beginning a brand-new stroke
+      const isNewStroke = c > 0 && waypoints[c]?.isStrokeStart;
+      if (c === 0 || (nearNext && isNewStroke)) {
+        connectedRef.current = c + 1;
+        setConnected(c + 1);
         makeSound("good", soundOn);
       }
     }
@@ -269,29 +296,26 @@ export default function WriteGame({
             {activeChar.label}
           </text>
 
-          {/* Dotted guide lines along all strokes (show all waypoints as dashed path) */}
-          {activeChar.strokes.map((stroke, si) => {
-            const pts = stroke.map((p) => `${p.x},${p.y}`).join(" ");
-            return (
-              <polyline
-                key={`guide-${si}`}
-                points={pts}
-                fill="none"
-                stroke={color}
-                strokeWidth="3"
-                strokeDasharray="6 8"
-                strokeLinecap="round"
-                opacity="0.2"
-                style={{ pointerEvents: "none" }}
-              />
-            );
-          })}
+          {/* Smooth dotted guide paths */}
+          {activeChar.strokes.map((stroke, si) => (
+            <path
+              key={`guide-${si}`}
+              d={smoothPath(stroke)}
+              fill="none"
+              stroke={color}
+              strokeWidth="3"
+              strokeDasharray="6 8"
+              strokeLinecap="round"
+              opacity="0.25"
+              style={{ pointerEvents: "none" }}
+            />
+          ))}
 
-          {/* Completed stroke polylines */}
+          {/* Smooth completed stroke paths */}
           {strokePolylines.map(({ si, pts }) => (
-            <polyline
+            <path
               key={`stroke-${si}`}
-              points={pts.map((p) => `${p.x},${p.y}`).join(" ")}
+              d={smoothPath(pts)}
               fill="none"
               stroke={color}
               strokeWidth="5"

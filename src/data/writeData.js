@@ -254,13 +254,22 @@ export const WRITE_CHARS = [
     type: "letter",
     color: LETTER_COLORS[10],
     strokes: [
+      // Spine
       [
         { x: 45, y: 20 },
+        { x: 45, y: 100 },
         { x: 45, y: 180 },
       ],
+      // Upper diagonal: top-right → mid-spine
       [
         { x: 155, y: 20 },
-        { x: 75, y: 100 },
+        { x: 100, y: 60 },
+        { x: 45, y: 100 },
+      ],
+      // Lower diagonal: mid-spine → bottom-right
+      [
+        { x: 45, y: 100 },
+        { x: 100, y: 140 },
         { x: 155, y: 180 },
       ],
     ],
