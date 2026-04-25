@@ -953,34 +953,39 @@
 .celebrate-wrap {
   position: relative;
   width: 100%;
-  height: 70px;
+  height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   pointer-events: none;
 }
 
 .celebrate-piece {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 0;
   transform: translate(-50%, -50%);
-  animation: confettiBurst 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: confettiBurst 1s cubic-bezier(0.15, 0.5, 0.3, 1) both;
   animation-delay: var(--delay, 0s);
   will-change: transform, opacity;
+  line-height: 1;
 }
 
 @keyframes confettiBurst {
   0% {
-    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
     opacity: 1;
   }
-  65% {
+  40% {
+    opacity: 1;
+  }
+  75% {
     opacity: 1;
   }
   100% {
     transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty)))
-      scale(1) rotate(var(--spin));
+      scale(1.1) rotate(var(--spin));
     opacity: 0;
   }
 }

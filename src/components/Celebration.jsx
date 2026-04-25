@@ -2,13 +2,13 @@ const CELEBRATE_EMOJIS = ["🌟", "🎉", "⭐", "✨", "🎊", "💫", "🌈", 
 const PARTICLES = Array.from({ length: 18 }, (_, i) => {
   const angle = (i / 18) * 360;
   const rad = (angle * Math.PI) / 180;
-  const d = 55 + (i % 4) * 18;
+  const d = 80 + (i % 4) * 25;
   return {
     emoji: CELEBRATE_EMOJIS[i % CELEBRATE_EMOJIS.length],
     tx: Math.cos(rad) * d,
     ty: Math.sin(rad) * d,
-    delay: (i % 5) * 0.06,
-    size: 1.1 + (i % 3) * 0.25,
+    delay: (i % 5) * 0.04,
+    size: 1.3 + (i % 3) * 0.3,
     spin: (i % 2 === 0 ? 1 : -1) * (90 + (i % 3) * 60),
   };
 });
