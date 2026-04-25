@@ -424,6 +424,7 @@ export default function WriteGame({
 
               const isStart = connected === 0 && !dragging;
               const isMoving = dragging && cursorPos;
+              const arrowColor = isStart || isMoving ? "#fff" : color;
 
               return (
                 <g style={{ pointerEvents: "none" }}>
@@ -443,14 +444,14 @@ export default function WriteGame({
                       y1="0"
                       x2="5"
                       y2="0"
-                      stroke="#fff"
+                      stroke={arrowColor}
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
                     <polyline
                       points="2,-3.5 5,0 2,3.5"
                       fill="none"
-                      stroke="#fff"
+                      stroke={arrowColor}
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
