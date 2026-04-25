@@ -1,4 +1,5 @@
-export const SIGHT_WORDS = [
+// Level 1 — short, very high-frequency words (2–4 letters)
+export const SIGHT_WORDS_L1 = [
   "the",
   "and",
   "is",
@@ -8,15 +9,94 @@ export const SIGHT_WORDS = [
   "can",
   "go",
   "see",
-  "play",
-  "look",
-  "little",
+  "my",
+  "to",
+  "a",
+  "in",
+  "on",
+  "up",
+  "at",
+  "am",
+  "do",
+  "no",
+  "so",
+  "he",
+  "she",
   "big",
+  "run",
+  "yes",
+  "no",
+  "but",
+  "get",
+];
+
+// Level 2 — medium-length, common words (4–6 letters)
+export const SIGHT_WORDS_L2 = [
+  "look",
+  "play",
   "come",
   "here",
   "jump",
-  "run",
   "like",
-  "my",
-  "to",
+  "said",
+  "have",
+  "they",
+  "with",
+  "this",
+  "that",
+  "from",
+  "what",
+  "some",
+  "when",
+  "then",
+  "will",
+  "your",
+  "want",
+  "help",
+  "down",
+  "stop",
+  "been",
+  "much",
 ];
+
+// Level 3 — longer, trickier words (5–8 letters)
+export const SIGHT_WORDS_L3 = [
+  "little",
+  "friend",
+  "about",
+  "again",
+  "would",
+  "could",
+  "every",
+  "their",
+  "there",
+  "where",
+  "which",
+  "always",
+  "people",
+  "first",
+  "never",
+  "those",
+  "right",
+  "great",
+  "before",
+  "around",
+  "while",
+  "should",
+  "happy",
+  "water",
+  "place",
+];
+
+// Flat list kept for any legacy usage
+export const SIGHT_WORDS = [
+  ...SIGHT_WORDS_L1,
+  ...SIGHT_WORDS_L2,
+  ...SIGHT_WORDS_L3,
+];
+
+export const SIGHT_WORDS_BY_LEVEL = {
+  1: SIGHT_WORDS_L1,
+  2: SIGHT_WORDS_L2,
+  3: SIGHT_WORDS_L3,
+};

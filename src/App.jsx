@@ -15,8 +15,8 @@ import { getPuzzlesForLevel } from "./data/dotPuzzles";
 const DEFAULT_PROGRESS = {
   stars: 0,
   sessions: 0,
-  sight: { correct: 0, total: 0, bestStreak: 0, masteredWords: [] },
-  math: { correct: 0, total: 0, bestStreak: 0 },
+  sight: { correct: 0, total: 0, bestStreak: 0, masteredWords: [], level: 1 },
+  math: { correct: 0, total: 0, bestStreak: 0, level: 1 },
   dot: { unlockedLevel: 1, completedPuzzles: [] },
   write: { completedChars: [] },
 };
@@ -28,6 +28,8 @@ function App() {
   const [roundIndex, setRoundIndex] = useState(1);
   const [gameId, setGameId] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [sessionCorrect, setSessionCorrect] = useState(0);
+  const [sessionResult, setSessionResult] = useState(null); // { score, total, leveledUp, nextLevel }
   const [soundOn, setSoundOn] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [pulse, setPulse] = useState("");
@@ -60,12 +62,19 @@ function App() {
       return;
     }
     setMode(nextMode);
-    setLevel(1);
+    const savedLevel = progress[nextMode]?.level ?? 1;
+    setLevel(savedLevel);
     setRoundIndex(1);
     setGameId((g) => g + 1);
     setStreak(0);
+    setSessionCorrect(0);
+    setSessionResult(null);
     setFeedback("");
-    setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
+    setRound(
+      nextMode === "sight"
+        ? buildSightRound(savedLevel)
+        : buildMathRound(savedLevel),
+    );
     setScreen("game");
   }
 
@@ -108,21 +117,31 @@ function App() {
     });
   }
 
-  function nextRound(nextLevel) {
+  function nextRound(correctThisRound) {
+    const updatedCorrect = sessionCorrect + (correctThisRound ? 1 : 0);
     if (roundIndex >= totalRounds) {
-      setProgress((prev) => ({ ...prev, sessions: prev.sessions + 1 }));
+      // Evaluate session: 7/10 or better → advance level
+      const passed = updatedCorrect >= 7;
+      const nextLevel = passed ? Math.min(3, level + 1) : level;
+      const result = {
+        score: updatedCorrect,
+        total: totalRounds,
+        leveledUp: passed && nextLevel > level,
+        nextLevel,
+      };
+      setSessionResult(result);
+      setProgress((prev) => ({
+        ...prev,
+        sessions: prev.sessions + 1,
+        [mode]: { ...prev[mode], level: nextLevel },
+      }));
       speakEncouragement();
       setScreen("reward");
       return;
     }
+    setSessionCorrect(updatedCorrect);
     setRoundIndex((prev) => prev + 1);
-    const resolvedLevel = Math.max(1, Math.min(3, nextLevel));
-    setLevel(resolvedLevel);
-    setRound(
-      mode === "sight"
-        ? buildSightRound(resolvedLevel)
-        : buildMathRound(resolvedLevel),
-    );
+    setRound(mode === "sight" ? buildSightRound(level) : buildMathRound(level));
     setFeedback("");
   }
 
@@ -131,10 +150,6 @@ function App() {
       mode === "sight" ? value === round.target : value === round.answer;
     const nextStreak = isCorrect ? streak + 1 : 0;
     setStreak(nextStreak);
-
-    const rise = nextStreak >= 3;
-    const drop = !isCorrect && streak > 0;
-    const nextLevel = rise ? level + 1 : drop ? level - 1 : level;
 
     if (isCorrect) {
       setPulse("win");
@@ -174,12 +189,12 @@ function App() {
         // Spell the word aloud, then advance only when speech finishes
         speakWordAndSpell(round.target, () => {
           setPulse("");
-          nextRound(nextLevel);
+          nextRound(true);
         });
       } else {
         setTimeout(() => {
           setPulse("");
-          nextRound(nextLevel);
+          nextRound(true);
         }, 700);
       }
     } else {
@@ -204,7 +219,7 @@ function App() {
       });
       setTimeout(() => {
         setPulse("");
-        nextRound(nextLevel);
+        nextRound(false);
       }, 700);
     }
   }
@@ -251,6 +266,7 @@ function App() {
         <RewardScreen
           progress={progress}
           streak={streak}
+          sessionResult={sessionResult}
           onPlayAgain={() => startGame(mode)}
           onViewProgress={() => setScreen("progress")}
         />
