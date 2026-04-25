@@ -9,6 +9,7 @@ import GameScreen from "./components/GameScreen";
 import RewardScreen from "./components/RewardScreen";
 import ProgressScreen from "./components/ProgressScreen";
 import DotGame from "./components/DotGame";
+import WriteGame from "./components/WriteGame";
 import { getPuzzlesForLevel } from "./data/dotPuzzles";
 
 const DEFAULT_PROGRESS = {
@@ -17,6 +18,7 @@ const DEFAULT_PROGRESS = {
   sight: { correct: 0, total: 0, bestStreak: 0, masteredWords: [] },
   math: { correct: 0, total: 0, bestStreak: 0 },
   dot: { unlockedLevel: 1, completedPuzzles: [] },
+  write: { completedChars: [] },
 };
 
 function App() {
@@ -53,6 +55,10 @@ function App() {
       setScreen("dot");
       return;
     }
+    if (nextMode === "write") {
+      setScreen("write");
+      return;
+    }
     setMode(nextMode);
     setLevel(1);
     setRoundIndex(1);
@@ -61,6 +67,22 @@ function App() {
     setFeedback("");
     setRound(nextMode === "sight" ? buildSightRound(1) : buildMathRound(1));
     setScreen("game");
+  }
+
+  function completeWriteChar(charId) {
+    setProgress((prev) => {
+      const write = prev.write ?? { completedChars: [] };
+      const alreadyDone = write.completedChars.includes(charId);
+      return {
+        ...prev,
+        stars: prev.stars + (alreadyDone ? 0 : 1),
+        write: {
+          completedChars: alreadyDone
+            ? write.completedChars
+            : [...write.completedChars, charId],
+        },
+      };
+    });
   }
 
   function completeDotPuzzle(puzzleId, level) {
@@ -237,6 +259,15 @@ function App() {
           dotUnlockedLevel={progress.dot?.unlockedLevel ?? 1}
           completedPuzzles={progress.dot?.completedPuzzles ?? []}
           onComplete={completeDotPuzzle}
+          onBack={() => setScreen("home")}
+        />
+      )}
+
+      {screen === "write" && (
+        <WriteGame
+          soundOn={soundOn}
+          completedChars={progress.write?.completedChars ?? []}
+          onComplete={completeWriteChar}
           onBack={() => setScreen("home")}
         />
       )}
