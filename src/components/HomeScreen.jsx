@@ -11,6 +11,28 @@ export default function HomeScreen({ progress, onStartGame }) {
       <div className="game-card-grid">
         <button
           type="button"
+          className="game-card game-card-write"
+          onClick={() => onStartGame("write")}
+        >
+          <img
+            src="/write-game.png"
+            alt="Write Game"
+            className="game-card-img"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+          <div
+            className="game-card-fallback game-card-fallback-write"
+            aria-hidden="true"
+          >
+            ✏️
+          </div>
+          <span className="game-card-label">Write Game</span>
+        </button>
+
+        <button
+          type="button"
           className="game-card game-card-sight"
           onClick={() => onStartGame("sight")}
         >
@@ -73,28 +95,6 @@ export default function HomeScreen({ progress, onStartGame }) {
             🔵
           </div>
           <span className="game-card-label">Dot Game</span>
-        </button>
-
-        <button
-          type="button"
-          className="game-card game-card-write"
-          onClick={() => onStartGame("write")}
-        >
-          <img
-            src="/write-game.png"
-            alt="Write Game"
-            className="game-card-img"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-          <div
-            className="game-card-fallback game-card-fallback-write"
-            aria-hidden="true"
-          >
-            ✏️
-          </div>
-          <span className="game-card-label">Write Game</span>
         </button>
       </div>
 
