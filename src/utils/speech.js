@@ -26,6 +26,33 @@ export function speakWord(word) {
   speechSynthesis.speak(repeatUtter);
 }
 
+// Speak word → spell letters → repeat word, then call onDone when finished
+export function speakWordAndSpell(word, onDone) {
+  if (!("speechSynthesis" in window)) {
+    onDone?.();
+    return;
+  }
+  speechSynthesis.cancel();
+
+  const wordUtter = new SpeechSynthesisUtterance(word);
+  wordUtter.rate = 0.8;
+  wordUtter.pitch = 1.25;
+
+  const letters = word.split("").join("   ");
+  const spellUtter = new SpeechSynthesisUtterance(letters);
+  spellUtter.rate = 0.4;
+  spellUtter.pitch = 1.2;
+
+  const repeatUtter = new SpeechSynthesisUtterance(word);
+  repeatUtter.rate = 0.8;
+  repeatUtter.pitch = 1.25;
+  repeatUtter.onend = () => onDone?.();
+
+  speechSynthesis.speak(wordUtter);
+  speechSynthesis.speak(spellUtter);
+  speechSynthesis.speak(repeatUtter);
+}
+
 export function speakPhrase(phrase) {
   if (!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();

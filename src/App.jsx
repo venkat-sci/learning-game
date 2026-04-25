@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { buildSightRound, buildMathRound } from "./utils/rounds";
 import { makeSound } from "./utils/sound";
-import { speakEncouragement } from "./utils/speech";
+import { speakEncouragement, speakWordAndSpell } from "./utils/speech";
 import TopBar from "./components/TopBar";
 import HomeScreen from "./components/HomeScreen";
 import GameScreen from "./components/GameScreen";
@@ -111,6 +111,7 @@ function App() {
   function nextRound(nextLevel) {
     if (roundIndex >= totalRounds) {
       setProgress((prev) => ({ ...prev, sessions: prev.sessions + 1 }));
+      speakEncouragement();
       setScreen("reward");
       return;
     }
@@ -139,7 +140,6 @@ function App() {
       setPulse("win");
       setFeedback("Great job! Keep going!");
       makeSound(nextStreak >= 3 ? "great" : "good", soundOn);
-      speakEncouragement();
       setProgress((prev) => {
         const base = {
           ...prev,
@@ -170,6 +170,18 @@ function App() {
           },
         };
       });
+      if (mode === "sight") {
+        // Spell the word aloud, then advance only when speech finishes
+        speakWordAndSpell(round.target, () => {
+          setPulse("");
+          nextRound(nextLevel);
+        });
+      } else {
+        setTimeout(() => {
+          setPulse("");
+          nextRound(nextLevel);
+        }, 700);
+      }
     } else {
       setPulse("oops");
       setFeedback(
@@ -190,12 +202,11 @@ function App() {
           math: { ...prev.math, total: prev.math.total + 1 },
         };
       });
+      setTimeout(() => {
+        setPulse("");
+        nextRound(nextLevel);
+      }, 700);
     }
-
-    setTimeout(() => {
-      setPulse("");
-      nextRound(nextLevel);
-    }, 700);
   }
 
   function resetProgress() {
