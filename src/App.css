@@ -732,3 +732,219 @@
     transform: translateX(6px);
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   WRITE GAME
+═══════════════════════════════════════════════════ */
+
+.write-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+
+.write-title {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-weight: 800;
+  color: #7c3aed;
+  margin: 0;
+  text-align: center;
+}
+
+/* Tab bar */
+.write-tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.25rem;
+}
+
+.write-tab {
+  padding: 0.45rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.write-tab.active {
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Character grid */
+.write-char-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.write-char-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  border: 2.5px solid var(--char-color, #7c3aed);
+  background: #fff;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s;
+}
+
+.write-char-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.write-char-card.completed {
+  background: #faf5ff;
+}
+
+.write-char-label {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.write-done-badge {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.65rem;
+}
+
+/* Trace view header */
+.write-game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 340px;
+}
+
+.write-game-mode {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.write-char-big {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* SVG wrapper */
+.write-svg-wrap {
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.12);
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.write-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: none;
+}
+
+/* Hint text */
+.write-hint {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+  color: #7c3aed;
+  text-align: center;
+  margin: 0;
+  min-height: 1.6em;
+}
+
+/* Completion banner */
+.write-reveal-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.write-reveal-text {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: clamp(1.1rem, 5vw, 1.5rem);
+  font-weight: 800;
+  color: #1e40af;
+  text-align: center;
+  margin: 0;
+}
+
+/* Pulsing next-dot animation — uses scale so it works across browsers */
+.write-next-pulse {
+  animation: writePulse 1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Letter reveal when tracing complete */
+.write-letter-reveal {
+  animation: letterReveal 0.9s ease forwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Home screen card */
+.game-card-fallback-write {
+  background: linear-gradient(145deg, #ede9fe, #c4b5fd);
+}
+
+.game-card-write .game-card-label {
+  background: linear-gradient(140deg, #8b5cf6, #6d28d9);
+  color: #fff;
+}
+
+@keyframes writePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.85;
+  }
+}
+
+@keyframes letterReveal {
+  from {
+    opacity: 0.07;
+    transform: scale(0.88);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+}
