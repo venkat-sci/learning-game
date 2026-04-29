@@ -588,6 +588,15 @@
   gap: 0.6rem;
 }
 
+.dot-puzzle-grid-lg {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.dot-puzzle-grid-lg .dot-puzzle-card {
+  padding: 1rem 0.6rem;
+}
+
 .dot-puzzle-card {
   position: relative;
   display: flex;
