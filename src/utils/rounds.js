@@ -19,13 +19,13 @@ export function buildOffsets(round) {
 export function buildSightRound(level) {
   const wordPool = SIGHT_WORDS_BY_LEVEL[level] ?? SIGHT_WORDS_BY_LEVEL[1];
   const target = randomFrom(wordPool);
-  // Decoys: first pull from same level, then from other levels to fill gaps
   const sameLevel = wordPool.filter((w) => w !== target);
   const otherLevels = Object.entries(SIGHT_WORDS_BY_LEVEL)
     .filter(([l]) => Number(l) !== level)
     .flatMap(([, words]) => words);
   const decoyPool = [...sameLevel, ...otherLevels];
-  const optionsCount = level === 3 ? 6 : level === 2 ? 5 : 4;
+  // Options count scales with difficulty
+  const optionsCount = level >= 5 ? 6 : level >= 4 ? 5 : level >= 3 ? 5 : level >= 2 ? 4 : 3;
   const decoys = shuffled(decoyPool).slice(0, optionsCount - 1);
   return { target, options: shuffled([target, ...decoys]) };
 }
@@ -33,25 +33,52 @@ export function buildSightRound(level) {
 export function buildMathRound(level) {
   let prompt, answer;
 
-  if (level === 3 && Math.random() > 0.4) {
-    // Level 3: simple multiplication (×2 through ×5)
-    const multiplier = Math.ceil(Math.random() * 4) + 1; // 2–5
-    const multiplicand = Math.ceil(Math.random() * 10); // 1–10
-    answer = multiplier * multiplicand;
-    prompt = `${multiplicand} × ${multiplier} = ?`;
-  } else {
-    const max = level === 1 ? 5 : level === 2 ? 10 : 20;
-    const useSubtract = level >= 2 && Math.random() > 0.45;
-    let a = Math.ceil(Math.random() * max);
-    let b = Math.ceil(Math.random() * max);
-    if (useSubtract && b > a) {
-      [a, b] = [b, a];
+  if (level >= 5) {
+    // Level 5: multiplication ×2–×10 + hard addition/subtraction up to 30
+    if (Math.random() > 0.35) {
+      const multiplier = Math.ceil(Math.random() * 9) + 1; // 2–10
+      const multiplicand = Math.ceil(Math.random() * 10);
+      answer = multiplier * multiplicand;
+      prompt = `${multiplicand} × ${multiplier} = ?`;
+    } else {
+      const a = Math.ceil(Math.random() * 30);
+      const b = Math.ceil(Math.random() * 15);
+      const useSubtract = b <= a;
+      answer = useSubtract ? a - b : a + b;
+      prompt = `${useSubtract ? a : a} ${useSubtract ? "-" : "+"} ${b} = ?`;
     }
+  } else if (level === 4) {
+    // Level 4: addition/subtraction up to 20
+    const useSubtract = Math.random() > 0.45;
+    let a = Math.ceil(Math.random() * 20);
+    let b = Math.ceil(Math.random() * 20);
+    if (useSubtract && b > a) [a, b] = [b, a];
     answer = useSubtract ? a - b : a + b;
     prompt = `${a} ${useSubtract ? "-" : "+"} ${b} = ?`;
+  } else if (level === 3) {
+    // Level 3: addition/subtraction up to 10
+    const useSubtract = Math.random() > 0.45;
+    let a = Math.ceil(Math.random() * 10);
+    let b = Math.ceil(Math.random() * 10);
+    if (useSubtract && b > a) [a, b] = [b, a];
+    answer = useSubtract ? a - b : a + b;
+    prompt = `${a} ${useSubtract ? "-" : "+"} ${b} = ?`;
+  } else if (level === 2) {
+    // Level 2: addition up to 10
+    const a = Math.ceil(Math.random() * 10);
+    const b = Math.ceil(Math.random() * 10);
+    answer = a + b;
+    prompt = `${a} + ${b} = ?`;
+  } else {
+    // Level 1: addition up to 5, very easy
+    const a = Math.ceil(Math.random() * 5);
+    const b = Math.ceil(Math.random() * 5);
+    answer = a + b;
+    prompt = `${a} + ${b} = ?`;
   }
 
-  const optionsCount = level === 3 ? 5 : 4;
+  // Options count scales with level
+  const optionsCount = level >= 5 ? 6 : level >= 4 ? 5 : level >= 2 ? 4 : 3;
   const choices = new Set([answer]);
   while (choices.size < optionsCount) {
     const drift = Math.ceil(Math.random() * 4);
