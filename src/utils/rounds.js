@@ -25,7 +25,8 @@ export function buildSightRound(level) {
     .flatMap(([, words]) => words);
   const decoyPool = [...sameLevel, ...otherLevels];
   // Options count scales with difficulty
-  const optionsCount = level >= 5 ? 6 : level >= 4 ? 5 : level >= 3 ? 5 : level >= 2 ? 4 : 3;
+  const optionsCount =
+    level >= 5 ? 6 : level >= 4 ? 5 : level >= 3 ? 5 : level >= 2 ? 4 : 3;
   const decoys = shuffled(decoyPool).slice(0, optionsCount - 1);
   return { target, options: shuffled([target, ...decoys]) };
 }
