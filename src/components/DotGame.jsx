@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { makeSound, playCelebration } from "../utils/sound";
 import { speakPhrase } from "../utils/speech";
 import { getPuzzlesForLevel } from "../data/dotPuzzles";
@@ -33,11 +33,27 @@ export default function DotGame({
   const [dragging, setDragging] = useState(false);
   const [cursorPos, setCursorPos] = useState(null); // live finger position in SVG coords
   const [done, setDone] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const svgRef = useRef(null);
   // Refs keep pointer handlers free of stale closure values
   const connectedRef = useRef(0);
   const dotsRef = useRef([]);
   const puzzleRef = useRef(null);
+  const hintTimerRef = useRef(null);
+
+  // Start/restart the 3-second idle timer — hint appears only if kid is stuck
+  const resetHintTimer = useCallback(() => {
+    setShowHint(false);
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    hintTimerRef.current = setTimeout(() => setShowHint(true), 3000);
+  }, []);
+
+  // Clean up timer when puzzle ends or component unmounts
+  useEffect(() => {
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
 
   function startPuzzle(puzzle) {
     setActivePuzzle(puzzle);
@@ -48,6 +64,10 @@ export default function DotGame({
     setDragging(false);
     setCursorPos(null);
     setDone(false);
+    setShowHint(false);
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    // Give kid a moment to look at the puzzle before first hint
+    hintTimerRef.current = setTimeout(() => setShowHint(true), 3000);
     setView("play");
   }
 
@@ -60,6 +80,8 @@ export default function DotGame({
     setDragging(false);
     setCursorPos(null);
     setDone(false);
+    setShowHint(false);
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
   }
 
   function backToPuzzles() {
@@ -70,6 +92,8 @@ export default function DotGame({
     setDragging(false);
     setCursorPos(null);
     setDone(false);
+    setShowHint(false);
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
   }
 
   function handlePointerDown(e) {
@@ -114,12 +138,15 @@ export default function DotGame({
         setDone(true);
         setDragging(false);
         setCursorPos(null);
+        setShowHint(false);
+        if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
         makeSound("great", soundOn);
         playCelebration(soundOn);
         speakPhrase(`You drew a ${puzzleRef.current.name}!`);
         onComplete(puzzleRef.current.id, puzzleRef.current.level);
       } else {
         makeSound("good", soundOn);
+        resetHintTimer();
       }
     }
   }
@@ -263,7 +290,8 @@ export default function DotGame({
           {/* Dot circles — pointer-events none so SVG handles them */}
           {dots.map((dot, i) => {
             const isSnapped = i < connected;
-            const isNext = i === connected && !done;
+            // Only highlight the next dot after the kid has been idle (struggling)
+            const isNext = i === connected && !done && showHint;
             return (
               <g key={i} style={{ pointerEvents: "none" }}>
                 <circle
