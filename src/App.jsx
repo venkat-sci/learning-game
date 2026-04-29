@@ -5,6 +5,7 @@ import { makeSound } from "./utils/sound";
 import { speakEncouragement, speakWordAndSpell } from "./utils/speech";
 import TopBar from "./components/TopBar";
 import HomeScreen from "./components/HomeScreen";
+import LevelSelectScreen from "./components/LevelSelectScreen";
 import GameScreen from "./components/GameScreen";
 import RewardScreen from "./components/RewardScreen";
 import ProgressScreen from "./components/ProgressScreen";
@@ -15,8 +16,21 @@ import { getPuzzlesForLevel } from "./data/dotPuzzles";
 const DEFAULT_PROGRESS = {
   stars: 0,
   sessions: 0,
-  sight: { correct: 0, total: 0, bestStreak: 0, masteredWords: [], level: 1 },
-  math: { correct: 0, total: 0, bestStreak: 0, level: 1 },
+  sight: {
+    correct: 0,
+    total: 0,
+    bestStreak: 0,
+    masteredWords: [],
+    unlockedLevel: 1,
+    completedLevels: [],
+  },
+  math: {
+    correct: 0,
+    total: 0,
+    bestStreak: 0,
+    unlockedLevel: 1,
+    completedLevels: [],
+  },
   dot: { unlockedLevel: 1, completedPuzzles: [] },
   write: { completedChars: [] },
 };
@@ -61,20 +75,20 @@ function App() {
       setScreen("write");
       return;
     }
+    // Sight / math: always go to level select first
     setMode(nextMode);
-    const savedLevel = progress[nextMode]?.level ?? 1;
-    setLevel(savedLevel);
+    setScreen("levelSelect");
+  }
+
+  function startLevel(lvl) {
+    setLevel(lvl);
     setRoundIndex(1);
     setGameId((g) => g + 1);
     setStreak(0);
     setSessionCorrect(0);
     setSessionResult(null);
     setFeedback("");
-    setRound(
-      nextMode === "sight"
-        ? buildSightRound(savedLevel)
-        : buildMathRound(savedLevel),
-    );
+    setRound(mode === "sight" ? buildSightRound(lvl) : buildMathRound(lvl));
     setScreen("game");
   }
 
@@ -120,20 +134,35 @@ function App() {
   function nextRound(correctThisRound) {
     const updatedCorrect = sessionCorrect + (correctThisRound ? 1 : 0);
     if (roundIndex >= totalRounds) {
-      // Evaluate session: 7/10 or better → advance level
+      // Evaluate session: 7/10 or better → pass and unlock next level
       const passed = updatedCorrect >= 7;
-      const nextLevel = passed ? Math.min(3, level + 1) : level;
+      const modeData = {
+        unlockedLevel: 1,
+        completedLevels: [],
+        ...progress[mode],
+      };
+      const newCompletedLevels =
+        passed && !modeData.completedLevels.includes(level)
+          ? [...modeData.completedLevels, level]
+          : modeData.completedLevels;
+      const newUnlockedLevel = passed
+        ? Math.min(5, Math.max(modeData.unlockedLevel, level + 1))
+        : modeData.unlockedLevel;
       const result = {
         score: updatedCorrect,
         total: totalRounds,
-        leveledUp: passed && nextLevel > level,
-        nextLevel,
+        leveledUp: passed && newUnlockedLevel > modeData.unlockedLevel,
+        nextUnlocked: newUnlockedLevel,
       };
       setSessionResult(result);
       setProgress((prev) => ({
         ...prev,
         sessions: prev.sessions + 1,
-        [mode]: { ...prev[mode], level: nextLevel },
+        [mode]: {
+          ...prev[mode],
+          completedLevels: newCompletedLevels,
+          unlockedLevel: newUnlockedLevel,
+        },
       }));
       speakEncouragement();
       setScreen("reward");
@@ -244,6 +273,16 @@ function App() {
         <HomeScreen progress={progress} onStartGame={startGame} />
       )}
 
+      {screen === "levelSelect" && (
+        <LevelSelectScreen
+          mode={mode}
+          unlockedLevel={progress[mode]?.unlockedLevel ?? 1}
+          completedLevels={progress[mode]?.completedLevels ?? []}
+          onSelectLevel={startLevel}
+          onBack={() => setScreen("home")}
+        />
+      )}
+
       {screen === "game" && (
         <GameScreen
           key={`${gameId}-${roundIndex}`}
@@ -267,7 +306,7 @@ function App() {
           progress={progress}
           streak={streak}
           sessionResult={sessionResult}
-          onPlayAgain={() => startGame(mode)}
+          onPlayAgain={() => setScreen("levelSelect")}
           onViewProgress={() => setScreen("progress")}
         />
       )}
