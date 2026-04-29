@@ -64,6 +64,38 @@ const LEVEL_CONFIG = {
       bg: "linear-gradient(135deg, #d8b4fe, #9333ea)",
     },
   ],
+  dot: [
+    {
+      level: 1,
+      emoji: "🔺",
+      label: "Simple Shapes",
+      bg: "linear-gradient(135deg, #86efac, #22c55e)",
+    },
+    {
+      level: 2,
+      emoji: "⭐",
+      label: "Fun Shapes",
+      bg: "linear-gradient(135deg, #fde68a, #f59e0b)",
+    },
+    {
+      level: 3,
+      emoji: "🚀",
+      label: "Cool Shapes",
+      bg: "linear-gradient(135deg, #93c5fd, #3b82f6)",
+    },
+    {
+      level: 4,
+      emoji: "🦋",
+      label: "Challenge!",
+      bg: "linear-gradient(135deg, #fdba74, #f97316)",
+    },
+    {
+      level: 5,
+      emoji: "🏆",
+      label: "Dot Master!",
+      bg: "linear-gradient(135deg, #d8b4fe, #9333ea)",
+    },
+  ],
 };
 
 export default function LevelSelectScreen({
@@ -74,8 +106,13 @@ export default function LevelSelectScreen({
   onBack,
 }) {
   const configs = LEVEL_CONFIG[mode] ?? LEVEL_CONFIG.sight;
-  const title = mode === "sight" ? "Sight Words" : "Math Fun";
-  const icon = mode === "sight" ? "📖" : "🔢";
+  const title =
+    mode === "sight"
+      ? "Sight Words"
+      : mode === "math"
+        ? "Math Fun"
+        : "Dot Game";
+  const icon = mode === "sight" ? "📖" : mode === "math" ? "🔢" : "🔵";
 
   return (
     <section className="panel level-select-panel">

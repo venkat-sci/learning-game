@@ -31,7 +31,7 @@ const DEFAULT_PROGRESS = {
     unlockedLevel: 1,
     completedLevels: [],
   },
-  dot: { unlockedLevel: 1, completedPuzzles: [] },
+  dot: { unlockedLevel: 1, completedPuzzles: [], completedLevels: [] },
   write: { completedChars: [] },
 };
 
@@ -110,7 +110,11 @@ function App() {
 
   function completeDotPuzzle(puzzleId, level) {
     setProgress((prev) => {
-      const dot = prev.dot ?? { unlockedLevel: 1, completedPuzzles: [] };
+      const dot = prev.dot ?? {
+        unlockedLevel: 1,
+        completedPuzzles: [],
+        completedLevels: [],
+      };
       const alreadyDone = dot.completedPuzzles.includes(puzzleId);
       const completedPuzzles = alreadyDone
         ? dot.completedPuzzles
@@ -120,13 +124,18 @@ function App() {
       const allLevelDone = levelPuzzles.every((p) =>
         completedPuzzles.includes(p.id),
       );
+      const prevCompletedLevels = dot.completedLevels ?? [];
+      const completedLevels =
+        allLevelDone && !prevCompletedLevels.includes(level)
+          ? [...prevCompletedLevels, level]
+          : prevCompletedLevels;
       const unlockedLevel = allLevelDone
-        ? Math.min(4, Math.max(dot.unlockedLevel, level + 1))
+        ? Math.min(5, Math.max(dot.unlockedLevel, level + 1))
         : dot.unlockedLevel;
       return {
         ...prev,
         stars: prev.stars + (alreadyDone ? 0 : 2),
-        dot: { unlockedLevel, completedPuzzles },
+        dot: { unlockedLevel, completedPuzzles, completedLevels },
       };
     });
   }
@@ -324,6 +333,7 @@ function App() {
           soundOn={soundOn}
           dotUnlockedLevel={progress.dot?.unlockedLevel ?? 1}
           completedPuzzles={progress.dot?.completedPuzzles ?? []}
+          completedLevels={progress.dot?.completedLevels ?? []}
           onComplete={completeDotPuzzle}
           onBack={() => setScreen("home")}
         />

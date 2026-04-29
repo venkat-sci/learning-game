@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { makeSound, playCelebration } from "../utils/sound";
 import { speakPhrase } from "../utils/speech";
-import { getPuzzlesForLevel, LEVELS } from "../data/dotPuzzles";
+import { getPuzzlesForLevel } from "../data/dotPuzzles";
 import Celebration from "./Celebration";
+import LevelSelectScreen from "./LevelSelectScreen";
 
 const HIT_RADIUS = 24; // SVG units — generous for small fingers
 
@@ -21,10 +22,12 @@ export default function DotGame({
   soundOn,
   dotUnlockedLevel,
   completedPuzzles,
+  completedLevels,
   onComplete,
   onBack,
 }) {
-  const [view, setView] = useState("levels"); // "levels" | "play"
+  const [view, setView] = useState("levels"); // "levels" | "puzzles" | "play"
+  const [selectedLevel, setSelectedLevel] = useState(null);
   const [activePuzzle, setActivePuzzle] = useState(null);
   const [connected, setConnected] = useState(0); // how many dots visited
   const [dragging, setDragging] = useState(false);
@@ -50,6 +53,17 @@ export default function DotGame({
 
   function backToLevels() {
     setView("levels");
+    setSelectedLevel(null);
+    setActivePuzzle(null);
+    connectedRef.current = 0;
+    setConnected(0);
+    setDragging(false);
+    setCursorPos(null);
+    setDone(false);
+  }
+
+  function backToPuzzles() {
+    setView("puzzles");
     setActivePuzzle(null);
     connectedRef.current = 0;
     setConnected(0);
@@ -119,56 +133,46 @@ export default function DotGame({
   // ── Level select view ──────────────────────────────────
   if (view === "levels") {
     return (
-      <section className="panel dot-panel">
-        <h2 className="dot-title">🔵 Dot Game</h2>
-        <p className="sub">Connect the dots to reveal a picture!</p>
+      <LevelSelectScreen
+        mode="dot"
+        unlockedLevel={dotUnlockedLevel}
+        completedLevels={completedLevels ?? []}
+        onSelectLevel={(lvl) => {
+          setSelectedLevel(lvl);
+          setView("puzzles");
+        }}
+        onBack={onBack}
+      />
+    );
+  }
 
-        <div className="dot-level-list">
-          {LEVELS.map((lvl) => {
-            const locked = lvl > dotUnlockedLevel;
-            const puzzles = getPuzzlesForLevel(lvl);
+  // ── Puzzle picker view ─────────────────────────────────
+  if (view === "puzzles") {
+    const puzzles = getPuzzlesForLevel(selectedLevel);
+    return (
+      <section className="panel dot-panel">
+        <button type="button" className="back-link" onClick={backToLevels}>
+          ← Back to Levels
+        </button>
+        <h2 className="dot-title">🔵 Level {selectedLevel} Puzzles</h2>
+        <p className="sub">Pick a picture to draw!</p>
+        <div className="dot-puzzle-grid dot-puzzle-grid-lg">
+          {puzzles.map((puzzle) => {
+            const isCompleted = completedPuzzles.includes(puzzle.id);
             return (
-              <div
-                key={lvl}
-                className={`dot-level-section${locked ? " locked" : ""}`}
+              <button
+                key={puzzle.id}
+                type="button"
+                className={`dot-puzzle-card${isCompleted ? " completed" : ""}`}
+                onClick={() => startPuzzle(puzzle)}
               >
-                <h3 className="dot-level-heading">
-                  {locked ? "🔒" : "✅"} Level {lvl}
-                  <span className="dot-level-sub">
-                    {lvl === 1 && " — Simple shapes"}
-                    {lvl === 2 && " — Fun shapes"}
-                    {lvl === 3 && " — Cool shapes"}
-                    {lvl === 4 && " — Challenge!"}
-                  </span>
-                </h3>
-                <div className="dot-puzzle-grid">
-                  {puzzles.map((puzzle) => {
-                    const isCompleted = completedPuzzles.includes(puzzle.id);
-                    return (
-                      <button
-                        key={puzzle.id}
-                        type="button"
-                        className={`dot-puzzle-card${isCompleted ? " completed" : ""}${locked ? " locked-card" : ""}`}
-                        disabled={locked}
-                        onClick={() => !locked && startPuzzle(puzzle)}
-                      >
-                        <span className="dot-puzzle-emoji">{puzzle.emoji}</span>
-                        <span className="dot-puzzle-name">{puzzle.name}</span>
-                        {isCompleted && (
-                          <span className="dot-done-badge">⭐</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                <span className="dot-puzzle-emoji">{puzzle.emoji}</span>
+                <span className="dot-puzzle-name">{puzzle.name}</span>
+                {isCompleted && <span className="dot-done-badge">⭐</span>}
+              </button>
             );
           })}
         </div>
-
-        <button type="button" className="back-link" onClick={onBack}>
-          ← Back Home
-        </button>
       </section>
     );
   }
@@ -300,7 +304,7 @@ export default function DotGame({
             <button
               type="button"
               className="action action-sight"
-              onClick={backToLevels}
+              onClick={backToPuzzles}
             >
               More Puzzles
             </button>
@@ -327,9 +331,9 @@ export default function DotGame({
         type="button"
         className="back-link"
         style={{ marginTop: "0.5rem" }}
-        onClick={backToLevels}
+        onClick={backToPuzzles}
       >
-        ← Back to Levels
+        ← Back to Puzzles
       </button>
     </section>
   );
