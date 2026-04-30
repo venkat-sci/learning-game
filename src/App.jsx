@@ -11,6 +11,7 @@ import RewardScreen from "./components/RewardScreen";
 import ProgressScreen from "./components/ProgressScreen";
 import DotGame from "./components/DotGame";
 import WriteGame from "./components/WriteGame";
+import GlitterSlate from "./components/GlitterSlate";
 import { getPuzzlesForLevel } from "./data/dotPuzzles";
 
 const DEFAULT_PROGRESS = {
@@ -73,6 +74,10 @@ function App() {
     }
     if (nextMode === "write") {
       setScreen("write");
+      return;
+    }
+    if (nextMode === "glitter") {
+      setScreen("glitter");
       return;
     }
     // Sight / math: always go to level select first
@@ -346,6 +351,10 @@ function App() {
           onComplete={completeWriteChar}
           onBack={() => setScreen("home")}
         />
+      )}
+
+      {screen === "glitter" && (
+        <GlitterSlate onBack={() => setScreen("home")} />
       )}
     </main>
   );
