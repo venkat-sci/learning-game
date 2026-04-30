@@ -1,7 +1,9 @@
 export default function HomeScreen({ progress, onStartGame }) {
   return (
     <section className="panel home-panel">
-      <p className="chip">Kindergarten • Sight Words + Math + Dot + Write</p>
+      <p className="chip">
+        Kindergarten • Sight Words + Math + Dot + Write + Glitter
+      </p>
       <h2>Play, Learn, and Grow Every Day</h2>
       <p className="sub">
         15-minute fun sessions with game challenges, friendly sounds, and rich
@@ -95,6 +97,28 @@ export default function HomeScreen({ progress, onStartGame }) {
             🔵
           </div>
           <span className="game-card-label">Dot Game</span>
+        </button>
+
+        <button
+          type="button"
+          className="game-card game-card-glitter"
+          onClick={() => onStartGame("glitter")}
+        >
+          <img
+            src="/glitter-slate.png"
+            alt="Glitter Slate"
+            className="game-card-img"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+          <div
+            className="game-card-fallback game-card-fallback-glitter"
+            aria-hidden="true"
+          >
+            ✨
+          </div>
+          <span className="game-card-label">Glitter Slate</span>
         </button>
       </div>
 
