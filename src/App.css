@@ -183,6 +183,187 @@
   color: #fff;
 }
 
+.game-card-fallback-glitter {
+  background: linear-gradient(145deg, #1e1035, #3b1f6e);
+  animation: glitter-bg 3s linear infinite;
+}
+
+@keyframes glitter-bg {
+  0% {
+    background: linear-gradient(145deg, #1e1035, #6b21a8);
+  }
+  33% {
+    background: linear-gradient(145deg, #0f2746, #1d4ed8);
+  }
+  66% {
+    background: linear-gradient(145deg, #1a3015, #15803d);
+  }
+  100% {
+    background: linear-gradient(145deg, #1e1035, #6b21a8);
+  }
+}
+
+.game-card-glitter .game-card-label {
+  background: linear-gradient(140deg, #a855f7, #ec4899);
+  color: #fff;
+}
+
+/* ── Glitter Slate screen ── */
+.glitter-slate-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  height: 100vh;
+  background: #0d0d1a;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.glitter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.glitter-title {
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  background: linear-gradient(
+    90deg,
+    #f472b6,
+    #facc15,
+    #34d399,
+    #60a5fa,
+    #a78bfa
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.glitter-clear-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 2px solid #f472b6;
+  background: transparent;
+  color: #f472b6;
+  font-family: "Baloo 2", "Nunito", sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.glitter-clear-btn:hover {
+  background: #f472b6;
+  color: #fff;
+}
+
+.glitter-canvas-wrap {
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #2d2050;
+  background: #0a0a14;
+  display: flex;
+}
+
+.glitter-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.glitter-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.glitter-palette {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.glitter-color-btn {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.glitter-color-btn:hover {
+  transform: scale(1.15);
+}
+.glitter-color-btn.selected {
+  border-color: #fff;
+  transform: scale(1.2);
+}
+.glitter-color-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #fff;
+  text-shadow: 0 0 4px #000;
+}
+
+.glitter-brushes {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.glitter-brush-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 2px solid #3b2d6e;
+  background: #12103a;
+  color: #c4b5fd;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.glitter-brush-btn:hover {
+  border-color: #a78bfa;
+}
+.glitter-brush-btn.selected {
+  border-color: #a78bfa;
+  background: #2d225e;
+}
+.glitter-brush-dot {
+  border-radius: 50%;
+  background: #c4b5fd;
+  display: block;
+  min-width: 4px;
+  min-height: 4px;
+}
+.glitter-brush-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 /* When real image loads, hide fallback */
 .game-card-img + .game-card-fallback {
   display: none;
