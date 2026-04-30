@@ -179,8 +179,6 @@ export default function GlitterSlate({ onBack }) {
     lastPos.current = pos;
     // Draw a dot immediately
     drawSegment(pos, pos);
-    // Always spawn a burst on first touch
-    spawnParticles(canvasRef.current, pos.x, pos.y, currentColor());
   }
 
   function draw(e) {
