@@ -162,11 +162,6 @@ export default function GlitterSlate({ onBack }) {
         ctx.fill();
         ctx.restore();
       }
-
-      // Occasional sparkle burst every ~30px of movement
-      if (Math.hypot(to.x - from.x, to.y - from.y) > 28) {
-        spawnParticles(canvas, to.x, to.y, color);
-      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedBrush, colorId],
